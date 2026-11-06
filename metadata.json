@@ -1,0 +1,6 @@
+{
+  "name": "NEXUS AI",
+  "description": "Assistente de inteligência artificial futurista com núcleo de energia luminoso e chat inteligente.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
