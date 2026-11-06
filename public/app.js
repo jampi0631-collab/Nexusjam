@@ -129,7 +129,7 @@ function loadHistory() {
     state.messages.push({
       id: Date.now(),
       sender: 'nexus',
-      text: `NEXUS online e com 100% de integridade nos sistemas. Às suas ordens, ${title}. Como posso auxiliá-lo estrategicamente hoje?`,
+      text: `E aí, ${title}! O NEXUS tá 100% online e pronto. Em que posso te ajudar hoje?`,
       timestamp: Date.now()
     });
     saveHistory();
@@ -440,7 +440,7 @@ async function sendMessage(overrideText) {
   state.isThinking = true;
   setCoreState('THINKING');
   dom.thinkingIndicator.style.display = 'flex';
-  dom.thinkingText.textContent = state.preferences.highThinking ? 'Análise quântica de alta profundidade...' : 'Sintetizando resposta tática...';
+  dom.thinkingText.textContent = state.preferences.highThinking ? 'Pensando detalhadamente...' : 'Digitando resposta...';
   scrollToBottom();
 
   try {
@@ -524,7 +524,7 @@ function renderMessages() {
   state.messages.forEach(msg => {
     const isUser = msg.sender === 'user';
     const timeStr = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const tag = isUser ? `[${userTitle.toUpperCase()} // DIRETRIZ]` : '[NEXUS // SYS_OK]';
+    const tag = isUser ? (userTitle.charAt(0).toUpperCase() + userTitle.slice(1)) : 'NEXUS';
 
     const card = document.createElement('div');
     card.className = `chat-msg ${isUser ? 'user' : 'nexus'}`;

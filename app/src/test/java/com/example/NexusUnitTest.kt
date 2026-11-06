@@ -44,6 +44,17 @@ class NexusUnitTest {
         assertTrue(chunks.isNotEmpty())
         val finalResponse = chunks.last()
         assertTrue(finalResponse.contains("chefe"))
-        assertTrue(finalResponse.contains("NEXUS"))
+    }
+
+    @Test
+    fun testRobloxRecommendation() = runBlocking {
+        val repo = NexusAiRepositoryImpl()
+        val prefs = NexusUserPreferences(userTitle = "chefe")
+        val chunks = repo.generateNexusResponse("qual é o melhor jogo de luta do Roblox?", emptyList(), prefs).toList()
+        
+        assertTrue(chunks.isNotEmpty())
+        val finalResponse = chunks.last()
+        assertTrue(finalResponse.contains("Strongest Battlegrounds") || finalResponse.contains("TSB"))
+        assertTrue(finalResponse.contains("Jujutsu Shenanigans"))
     }
 }

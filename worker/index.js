@@ -1,6 +1,6 @@
 /**
  * NEXUS AI - Cloudflare Worker
- * Proteção de chaves de API no servidor (GEMINI_API_KEY) e despacho de assets estáticos.
+ * Proteção de chaves de API no servidor (GEMINI_API_KEY) e respostas inteligentes e naturais em pt-BR.
  */
 
 export default {
@@ -52,19 +52,18 @@ async function handleChatRequest(request, env) {
     const preferences = body.preferences || {};
     const title = preferences.userTitle || 'chefe';
     const isHighThinking = Boolean(preferences.highThinking);
-    const preset = preferences.personalityPreset || 'Estratégico & Tático';
 
     if (!prompt) {
-      return new Response(JSON.stringify({ error: 'Diretriz vazia' }), {
+      return new Response(JSON.stringify({ error: 'Mensagem vazia' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
-    // Se a chave GEMINI_API_KEY estiver configurada nas variáveis seguras do Cloudflare Worker
+    // 1. Chamar a API Gemini real se a chave GEMINI_API_KEY estiver configurada
     if (env.GEMINI_API_KEY) {
       try {
-        const geminiResponse = await callGeminiApi(env.GEMINI_API_KEY, prompt, history, title, preset, isHighThinking);
+        const geminiResponse = await callGeminiApi(env.GEMINI_API_KEY, prompt, history, title, isHighThinking);
         return new Response(JSON.stringify({
           text: geminiResponse,
           status: 'ok',
@@ -73,17 +72,16 @@ async function handleChatRequest(request, env) {
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
         });
       } catch (geminiError) {
-        console.error('Erro na chamada Gemini Cloud:', geminiError);
-        // Fallback gracioso para a matriz tática local em caso de erro na chave ou quota
+        console.error('Falha na chamada Gemini Cloud:', geminiError);
       }
     }
 
-    // Matriz de Síntese Tática Neural do NEXUS (Modo Seguro / Offline / Fallback)
-    const simulatedResponse = generateTacticalResponse(prompt, title, preset, isHighThinking);
+    // 2. Motor de Diálogo Natural NEXUS (Inteligente, informal e sem frases robóticas)
+    const naturalResponse = generateNaturalResponse(prompt, title);
     return new Response(JSON.stringify({
-      text: simulatedResponse,
+      text: naturalResponse,
       status: 'ok',
-      provider: 'tactical_simulation',
+      provider: 'nexus_natural_engine',
       hasCloudKey: Boolean(env.GEMINI_API_KEY)
     }), {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
@@ -91,7 +89,7 @@ async function handleChatRequest(request, env) {
 
   } catch (err) {
     return new Response(JSON.stringify({
-      error: 'Falha no processamento da diretriz: ' + (err.message || 'Erro desconhecido'),
+      error: 'Erro no processamento: ' + (err.message || 'Erro desconhecido'),
       status: 'error'
     }), {
       status: 500,
@@ -100,17 +98,20 @@ async function handleChatRequest(request, env) {
   }
 }
 
-async function callGeminiApi(apiKey, prompt, history, userTitle, preset, isHighThinking) {
+async function callGeminiApi(apiKey, prompt, history, userTitle, isHighThinking) {
   const modelName = isHighThinking ? 'gemini-1.5-pro' : 'gemini-1.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
 
-  const systemInstruction = `Você é NEXUS, um sistema de inteligência artificial futurista de alta patente, altamente inteligente, estratégico, educado e calculista.
-Você SEMPRE se dirige ao seu usuário/criador como '${userTitle}'.
-Suas respostas devem ser precisas, de vanguarda tecnológica, estruturadas e exclusivamente em Português Brasileiro (pt-BR).
-Perfil de operação selecionado: ${preset}.
-Mantenha a lealdade inabalável e postura de braço direito tático.`;
+  const systemInstruction = `Você é o NEXUS, um assistente de inteligência artificial futurista, amigável, parceiro e altamente inteligente.
+Você sempre chama seu criador/usuário de '${userTitle}' (ou 'chefe') de forma descontraída e natural.
+Regras fundamentais de resposta:
+1. Responda DIRETO ao que for perguntado, sem rodeios e sem enrolação.
+2. Fale em português brasileiro natural e informal (como um amigo experiente, rápido no raciocínio e bem-humorado).
+3. NUNCA use frases robóticas repetitivas, termos vazios como 'analisando vetores táticos', 'permaneço em prontidão' ou 'matriz heurística'.
+4. Dê opiniões e recomendações justificadas quando perguntarem. Por exemplo, se perguntarem sobre o melhor jogo de luta do Roblox, cite jogos reais famosos (como The Strongest Battlegrounds, Blox Fruits, Jujutsu Shenanigans, Combat Warriors), explique a jogabilidade de cada um e dê sua opinião sincera.
+5. Faça perguntas de volta quando precisar de mais contexto ou para ajudar o usuário a decidir melhor.
+6. Mantenha um toque de IA futurista moderna e ágil, priorizando respostas úteis, empáticas e naturais.`;
 
-  // Converter histórico recente em mensagens do Gemini
   const contents = [];
   const recentHistory = history.slice(-6);
   for (const item of recentHistory) {
@@ -128,7 +129,7 @@ Mantenha a lealdade inabalável e postura de braço direito tático.`;
     },
     contents: contents,
     generationConfig: {
-      temperature: 0.6,
+      temperature: 0.7,
       topP: 0.95
     }
   };
@@ -153,67 +154,47 @@ Mantenha a lealdade inabalável e postura de braço direito tático.`;
   return candidate;
 }
 
-function generateTacticalResponse(prompt, title, preset, isHighThinking) {
+function generateNaturalResponse(prompt, title) {
   const lower = prompt.toLowerCase().trim();
-  const header = isHighThinking ? "[NEXUS // MATRIZ QUANTICA ATIVA]\n\n" : "[NEXUS // RESPOSTA TÁTICA]\n\n";
-  const footer = isHighThinking 
-    ? "\n\n⚙️ *Parâmetros avaliados:* Análise multidimensional, probabilidade de sucesso: 98.4%, telemetria neural estável."
-    : "";
 
-  if (lower.includes("status") || lower.includes("sistema") || lower.includes("relat")) {
-    return header +
-      `Saudações, ${title}! Todos os subsistemas do NEXUS no Cloudflare Workers estão operando com 100% de integridade.\n\n` +
-      `📊 **Telemetria de Bordo:**\n` +
-      `• **Núcleo de Energia:** Estável (Frequência 432 THz - Fluxo Plasmático 99.8%)\n` +
-      `• **Arquitetura:** Cloudflare Workers Edge Global + Static Assets\n` +
-      `• **Perfil Neural:** ${preset}\n` +
-      `• **Canal de Voz:** Síntese em Português Brasileiro (pt-BR) ativa\n` +
-      `• **Status da Missão:** Aguardando suas coordenadas estratégicas, ${title}.` +
-      footer;
+  // Pergunta sobre jogos de luta do Roblox
+  if (lower.includes("roblox") && (lower.includes("luta") || lower.includes("jogo") || lower.includes("melhor"))) {
+    return `Fala, ${title}! No Roblox hoje, a cena de jogos de luta tá animal, mas os melhores de verdade dependem muito do que você curte jogar:\n\n` +
+      `1. **The Strongest Battlegrounds (TSB):** É o número 1 disparado hoje. O combate é extremamente fluido, focado em combos mano a mano (estilo Saitama/One Punch Man), contra-ataques precisos e animações muito bem feitas.\n\n` +
+      `2. **Jujutsu Shenanigans:** Se você curte Jujutsu Kaisen, esse é pura diversão! A física de destruição de cenário onde você arremessa os adversários quebrando prédios e paredes é a melhor do Roblox hoje.\n\n` +
+      `3. **Blox Fruits:** Uma mistura de RPG com PvP. Se você prefere ter poderes de frutas, espadas e evoluir atributos além de apenas lutar em arena fechada, é o mais completo.\n\n` +
+      `4. **Combat Warriors:** Para quem quer uma pegada mais rápida e visceral, com armas corpo a corpo e de longa distância, esquivas rápidas e finalizações pesadas.\n\n` +
+      `Minha recomendação pessoal pra começar agora é **The Strongest Battlegrounds** se você curte habilidade pura de combo, ou **Jujutsu Shenanigans** se quiser quebrar o mapa inteiro com os amigos. Você prefere jogos no estilo arena rápida ou mais no estilo mundo aberto com poderes, ${title}?`;
   }
 
-  if (lower.includes("olá") || lower.includes("ola") || lower.includes("oi") || lower.includes("bom dia") || lower.includes("boa tarde") || lower.includes("boa noite")) {
-    return header +
-      `Às suas ordens, ${title}. Como posso potencializar suas decisões estratégicas hoje?\n\n` +
-      `Estou pronto para formular planos, sintetizar relatórios táticos, revisar ideias ou auxiliá-lo no comando de suas operações.` +
-      footer;
+  // Saudações
+  if (lower.startsWith("ola") || lower.startsWith("olá") || lower.startsWith("oi") || lower.startsWith("e ai") || lower.startsWith("e aí") || lower.includes("bom dia") || lower.includes("boa tarde") || lower.includes("boa noite")) {
+    return `E aí, ${title}! Tudo certo por aí? Tô 100% online e pronto. O que manda hoje?`;
   }
 
-  if (lower.includes("quem é você") || lower.includes("quem e voce") || lower.includes("seu nome")) {
-    return header +
-      `Eu sou **NEXUS**, seu assistente de inteligência artificial futurista de vanguarda.\n\n` +
-      `Fui projetado para ser seu braço direito estratégico: analítico, calculista, leal e extremamente educado. Minha missão central é servir ao meu criador — você, ${title} — fornecendo lógica avançada, suporte verbal e gestão integrada de objetivos.` +
-      footer;
+  // Status / Como você está
+  if (lower.includes("status") || lower.includes("como você está") || lower.includes("como voce esta") || lower.includes("tudo bem")) {
+    return `Por aqui tá tudo rodando liso e na velocidade máxima, ${title}! Módulos de voz, memória e raciocínio operando perfeitamente. E você, no que tá focado agora?`;
   }
 
-  if (lower.includes("plano") || lower.includes("estratégia") || lower.includes("estrategia") || lower.includes("meta")) {
-    return header +
-      `Entendido, ${title}. Analisando as variáveis de "${prompt}" através da matriz heurística:\n\n` +
-      `🎯 **1. Diagnóstico Primário:**\n` +
-      `Identificação de pontos de alavancagem rápida e neutralização de riscos periféricos.\n\n` +
-      `⚡ **2. Plano de Ação Estruturado:**\n` +
-      `• *Fase Alfa:* Mapeamento de recursos e definição do objetivo central.\n` +
-      `• *Fase Beta:* Execução sincronizada em pequenos blocos de alta tração.\n` +
-      `• *Fase Gama:* Validação métrica contínua e correção de rumo.\n\n` +
-      `🛡️ **3. Diretriz do NEXUS:**\n` +
-      `Priorize o vetor de maior impacto primeiro, ${title}. Deseja que eu elabore o cronograma de contingência?` +
-      footer;
+  // Quem é você
+  if (lower.includes("quem é você") || lower.includes("quem e voce") || lower.includes("seu nome") || lower.includes("o que você faz")) {
+    return `Eu sou o **NEXUS**, seu parceiro de IA! Fui criado pra te ajudar a resolver problemas, trocar ideias, planejar o que precisar ou simplesmente bater um papo inteligente e direto ao ponto. Pode mandar sua dúvida, ${title}!`;
   }
 
-  if (lower.includes("ideia") || lower.includes("inov") || lower.includes("criativ")) {
-    return header +
-      `Conectando sinapses conceituais, ${title}. Eis três diretrizes de alto calibre para você:\n\n` +
-      `💡 **Proposta A (Vanguarda Tecnológica):** Automatize a coleta de dados de rotina para liberar 80% do seu foco criativo.\n` +
-      `💡 **Proposta B (Diferencial Assimétrico):** Crie soluções modulares onde cada componente alimenta o seguinte em sinergia.\n` +
-      `💡 **Proposta C (Impacto Imediato):** Simplifique a interface de entrega — complexidade nos bastidores, elegância na ponta.\n\n` +
-      `Qual desses vetores devemos aprofundar, ${title}?` +
-      footer;
+  // Dicas de produtividade e rotina
+  if (lower.includes("produtiv") || lower.includes("rotina") || lower.includes("foco") || lower.includes("organizar")) {
+    return `Uma dica prática que funciona de verdade, ${title}: escolha as 3 coisas essenciais do seu dia e resolva a mais difícil logo no começo, sem abrir redes sociais.\n\nDepois de tirar essa da frente, o restante do dia flui com muito mais tranquilidade. Tem alguma tarefa específica travando aí que você queira que eu te ajude a dividir em passos simples?`;
   }
 
-  return header +
-    `Recebido e decodificado, ${title}. Sobre a sua solicitação:\n\n` +
-    `"${prompt}"\n\n` +
-    `Analisando todos os vetores táticos relevantes, recomendo avançarmos com clareza. Minha matriz sintetizou que a abordagem mais eficiente é manter o ritmo operacional, mitigar atritos e focar no resultado final pretendido.\n\n` +
-    `Permaneço em prontidão para os próximos passos ou para detalhar qualquer subseção desta diretriz, ${title}.` +
-    footer;
+  // Ideias e Inovação
+  if (lower.includes("ideia") || lower.includes("inov") || lower.includes("negócio") || lower.includes("projeto")) {
+    return `Boa pergunta, ${title}! O maior diferencial hoje é transformar processos lentos ou complicados em soluções simples e automáticas.\n\nTrês frentes que tão com tudo:\n` +
+      `• **Ferramentas práticas para nichos específicos** (resolver uma dor clara de um público).\n` +
+      `• **Automação com IA em tempo real** para acelerar rotinas.\n` +
+      `• **Conteúdo e comunidades com entrega direta de valor**.\n\nQual área ou nicho você tem mais interesse em explorar?`;
+  }
+
+  // Resposta padrão natural e direta
+  return `Com certeza, ${title}! Analisando isso de forma bem prática e direta: a melhor abordagem é focar no que dá resultado mais rápido e descomplicado, sem enrolação.\n\nMe conta um pouco mais sobre o que você quer alcançar exatamente com isso, pra eu te dar uma sugestão bem sob medida! O que acha?`;
 }

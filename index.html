@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NEXUS AI // Assistente Tático</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="nexus-body">
+  <div class="app-layout">
+    
+    <!-- Left Pane: Holographic Telemetry Deck (Adapts side-by-side on Tablets & Desktops) -->
+    <aside class="telemetry-pane" id="telemetryPane">
+      <div class="pane-header">
+        <div class="brand-badge">
+          <span class="pulse-dot online"></span>
+          <span class="brand-name">NEXUS AI</span>
+          <span class="version-tag">v3.8</span>
+        </div>
+        <div class="status-badge" id="telemetryState">CORE // ONLINE</div>
+      </div>
+
+      <div class="core-stage">
+        <canvas id="energyCoreCanvas" width="280" height="280"></canvas>
+        <div class="core-subtext" id="coreSubtext">MATRIZ HOLOGRÁFICA PRONTA</div>
+      </div>
+
+      <div class="telemetry-card">
+        <div class="card-title">TELEMETRIA DE BORDO</div>
+        <div class="telemetry-grid">
+          <div class="telem-row">
+            <span class="telem-label">Frequência Neural:</span>
+            <span class="telem-val" id="telemFreq">432.0 THz</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">Estabilidade do Fluxo:</span>
+            <span class="telem-val" id="telemFlux">99.85%</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">Voz Ativa:</span>
+            <span class="telem-val" id="telemVoice">pt-BR (Pronta)</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">Vetor Primário:</span>
+            <span class="telem-val" id="telemTitle">chefe</span>
+          </div>
+          <div class="telem-row">
+            <span class="telem-label">Hospedagem:</span>
+            <span class="telem-val text-cyan">Cloudflare Workers</span>
+          </div>
+        </div>
+
+        <button class="stop-speech-btn" id="stopSpeechBtn" style="display: none;">
+          ⏹ Interromper Fala
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right Pane / Main Terminal Console -->
+    <main class="console-pane">
+      <!-- Top HUD Header -->
+      <header class="hud-header">
+        <div class="hud-left">
+          <button class="mobile-core-toggle" id="mobileCoreToggle" title="Alternar Núcleo de Energia">
+            <span class="mini-core-indicator"></span>
+            <span class="mobile-title">NEXUS AI</span>
+          </button>
+          <div class="hud-status-chip" id="hudStatusChip">ONLINE // PRONTO</div>
+        </div>
+
+        <div class="hud-actions">
+          <button class="hud-btn" id="toggleAudioBtn" title="Alternar Voz Automática" aria-label="Alternar Voz Automática">
+            <span id="audioIcon">🔊</span>
+          </button>
+          <button class="hud-btn" id="openClearModalBtn" title="Purgar Histórico" aria-label="Purgar Histórico">
+            <span>🗑️</span>
+          </button>
+          <button class="hud-btn" id="openSettingsModalBtn" title="Configurações e Preferências" aria-label="Configurações">
+            <span>⚙️</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Cloud Notice Banner -->
+      <div class="notice-banner" id="noticeBanner">
+        <div class="notice-header" id="noticeToggle">
+          <span class="notice-tag">ℹ️ CLOUDFLARE WORKERS // MÓDULO SEGURO</span>
+          <span class="notice-arrow" id="noticeArrow">▼</span>
+        </div>
+        <div class="notice-body" id="noticeBody">
+          <p>
+            O NEXUS opera no Cloudflare Workers com proteção integral de chaves de API.
+            Para conectar diretamente o modelo Google Gemini Cloud em tempo real, adicione o segredo
+            <code>GEMINI_API_KEY</code> nas variáveis do seu Cloudflare Worker. O sintetizador neural local
+            está 100% ativo e pronto para responder em Português Brasileiro (pt-BR).
+          </p>
+        </div>
+      </div>
+
+      <!-- Chat Log Stream -->
+      <div class="chat-container" id="chatContainer">
+        <div class="chat-messages" id="chatMessages">
+          <!-- Dynamic Messages Injected via app.js -->
+        </div>
+
+        <!-- Thinking Indicator -->
+        <div class="thinking-indicator" id="thinkingIndicator" style="display: none;">
+          <div class="quantum-spinner"></div>
+          <span class="thinking-text" id="thinkingText">Sintetizando matriz quântica...</span>
+        </div>
+      </div>
+
+      <!-- Quick Action Tactical Prompt Chips -->
+      <div class="quick-actions-bar">
+        <div class="quick-chips-scroll">
+          <button class="quick-chip" data-prompt="Apresente um relatório de status do sistema e prontidão operacional.">
+            ⚡ Status do Sistema
+          </button>
+          <button class="quick-chip" data-prompt="Elabore um plano estratégico tático para acelerar meus objetivos principais.">
+            🎯 Plano Estratégico
+          </button>
+          <button class="quick-chip" data-prompt="Como posso otimizar minha rotina de trabalho hoje para máximo rendimento?">
+            🧠 Produtividade Tática
+          </button>
+          <button class="quick-chip" data-prompt="Sintetize 3 ideias de vanguarda tecnológica e automação inteligente.">
+            💡 Ideias Inovadoras
+          </button>
+          <button class="quick-chip" data-prompt="Quais as melhores práticas defensivas para proteger dados e fluxos de trabalho?">
+            🛡️ Diretriz de Segurança
+          </button>
+        </div>
+      </div>
+
+      <!-- Cybernetic Command Input Bar -->
+      <footer class="command-bar">
+        <button class="mic-btn" id="micBtn" title="Comando por Voz (pt-BR)" aria-label="Comando de Voz">
+          <span id="micIcon">🎙️</span>
+        </button>
+
+        <textarea 
+          class="command-input" 
+          id="commandInput" 
+          placeholder="Digite ou fale uma diretriz para o NEXUS..."
+          rows="1"
+        ></textarea>
+
+        <button class="send-btn" id="sendBtn" title="Transmitir Diretriz" aria-label="Enviar Mensagem">
+          <span>➤</span>
+        </button>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Settings & Preferences Modal -->
+  <div class="modal-backdrop" id="settingsModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">CONFIGURAÇÕES DO NEXUS</h3>
+        <button class="close-modal-btn" id="closeSettingsBtn">✕</button>
+      </div>
+
+      <div class="modal-content">
+        <div class="form-group">
+          <label for="prefUserTitle">Como o NEXUS deve chamar você:</label>
+          <input type="text" id="prefUserTitle" class="text-input" placeholder="Ex: chefe, comandante, capitão..." maxlength="24">
+        </div>
+
+        <div class="form-group toggle-group">
+          <div>
+            <div class="toggle-label">Voz Automática (TTS)</div>
+            <div class="toggle-sub">Sintetiza em voz alta em pt-BR ao receber respostas</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="prefAutoSpeak">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-group toggle-group">
+          <div>
+            <div class="toggle-label">Raciocínio Profundo (High Thinking)</div>
+            <div class="toggle-sub">Ativa inferência analítica estendida</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="prefHighThinking">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <div class="slider-header">
+            <span>Velocidade da Voz:</span>
+            <span id="speechRateVal">1.0x</span>
+          </div>
+          <input type="range" id="prefSpeechRate" min="0.7" max="1.5" step="0.1" value="1.0" class="range-slider">
+        </div>
+
+        <div class="form-group">
+          <div class="slider-header">
+            <span>Tom da Voz:</span>
+            <span id="speechPitchVal">1.0x</span>
+          </div>
+          <input type="range" id="prefSpeechPitch" min="0.7" max="1.3" step="0.1" value="1.0" class="range-slider">
+        </div>
+
+        <div class="form-group">
+          <label>Perfil Estratégico do NEXUS:</label>
+          <div class="preset-options" id="presetOptions">
+            <button class="preset-btn active" data-preset="Estratégico & Tático">Estratégico & Tático</button>
+            <button class="preset-btn" data-preset="Analítico Científico">Analítico Científico</button>
+            <button class="preset-btn" data-preset="Sintético & Direto">Sintético & Direto</button>
+            <button class="preset-btn" data-preset="Inovador & Visionário">Inovador & Visionário</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="savePreferencesBtn">Salvar Preferências</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear History Confirmation Modal -->
+  <div class="modal-backdrop" id="clearModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title text-crimson">PURGA DE MEMÓRIA</h3>
+        <button class="close-modal-btn" id="closeClearBtn">✕</button>
+      </div>
+      <div class="modal-content">
+        <p class="modal-desc">
+          Deseja purgar todo o histórico de mensagens armazenado na matriz local? Esta operação é irreversível.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelClearBtn">Cancelar</button>
+        <button class="btn btn-danger" id="confirmClearBtn">Purgar Memória</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/app.js"></script>
+</body>
+</html>

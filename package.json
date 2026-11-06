@@ -5,9 +5,11 @@
   "main": "worker/index.js",
   "type": "module",
   "scripts": {
-    "build": "node build.js",
-    "dev": "wrangler dev",
-    "deploy": "npm run build && wrangler deploy"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "wrangler deploy"
   },
   "keywords": [
     "ai",
@@ -16,5 +18,9 @@
     "nexus-ai"
   ],
   "author": "NEXUS Core",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^8.3.6",
+    "wrangler": "^4.158.0"
+  }
 }

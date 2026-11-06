@@ -85,7 +85,7 @@ class NexusViewModel(application: Application) : AndroidViewModel(application) {
                 chatDao.insertMessage(
                     ChatMessageEntity(
                         sender = "nexus",
-                        text = "NEXUS online e com 100% de integridade nos sistemas. Às suas ordens, $title. Como posso auxiliá-lo estrategicamente hoje?",
+                        text = "E aí, $title! O NEXUS tá 100% online e pronto. Em que posso te ajudar hoje?",
                         status = "DELIVERED"
                     )
                 )
@@ -119,9 +119,9 @@ class NexusViewModel(application: Application) : AndroidViewModel(application) {
             _isThinking.value = true
             _coreState.value = CoreState.THINKING
             _thinkingStatus.value = if (preferences.value.highThinking) {
-                "Análise quântica de alta profundidade..."
+                "Pensando detalhadamente..."
             } else {
-                "Sintetizando resposta tática..."
+                "Digitando resposta..."
             }
 
             // 3. Create placeholder for NEXUS response in Room
@@ -233,7 +233,7 @@ class NexusViewModel(application: Application) : AndroidViewModel(application) {
             chatDao.insertMessage(
                 ChatMessageEntity(
                     sender = "nexus",
-                    text = "Terminal resetado. Matriz de histórico purgada com sucesso, $title. Pronto para novas diretrizes.",
+                    text = "Histórico limpo com sucesso, $title! Pode mandar sua próxima dúvida ou assunto.",
                     status = "DELIVERED"
                 )
             )

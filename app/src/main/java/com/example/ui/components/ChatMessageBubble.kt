@@ -68,9 +68,9 @@ fun ChatMessageBubble(
     val formattedTime = timeFormat.format(Date(message.timestamp))
 
     val displayTitle = if (isUser) {
-        "[${userTitle.uppercase()} // DIRETRIZ]"
+        userTitle.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
     } else {
-        "[NEXUS // SYS_OK]"
+        "NEXUS"
     }
 
     Row(
